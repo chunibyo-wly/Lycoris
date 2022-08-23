@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
 
 
 def override(f):
@@ -21,9 +21,11 @@ class MainWindow(QtWidgets.QWidget):  # 主窗口 继承自QWidgets
         self.pixmap = QtGui.QPixmap(r'resource/sakana.png')  # 用QPixmap加载本地png图片
 
         self.menu = QtWidgets.QMenu()  # 实例化一个QMenu对象
-        self.exit_menu = self.menu.addAction('退出')  # 往QMenu添加一个文本为“退出”的action 存放在exit变量里
         self.draggable_menu = self.menu.addAction('移动')
         self.draggable_menu.setCheckable(True)
+        self.exit_menu = self.menu.addAction('退出')  # 往QMenu添加一个文本为“退出”的action 存放在exit变量里
+
+        self.player = None
 
         self.initUI()
 
@@ -34,17 +36,32 @@ class MainWindow(QtWidgets.QWidget):  # 主窗口 继承自QWidgets
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint)  # 设置主窗口置顶显示
 
         self.updatePixmap("sakana.png")
+        self.updateAudioFile("sakana.wav")
 
     def updatePixmap(self, image_name):
-        self.pixmap = QtGui.QPixmap(rf'resource/{image_name}')
+        self.pixmap = QtGui.QPixmap(self.getResource(image_name))
         pixmap = self.pixmap.scaled(self.width, self.height, QtCore.Qt.IgnoreAspectRatio,
                                     QtCore.Qt.SmoothTransformation)  # 抗锯齿缩放至800x720
         self.figLabel.setPixmap(pixmap)  # 用setPixmap将立绘展示到QLabel上
         self.figLabel.setGeometry(0, 0, self.width, self.height)  # 将QLabel覆盖到graph上面
 
+    def updateAudioFile(self, audio_name):
+        url = QtCore.QUrl.fromLocalFile(self.getResource(audio_name))
+        content = QtMultimedia.QMediaContent(url)
+        self.player = QtMultimedia.QMediaPlayer()
+        self.player.setMedia(content)
+
+    @staticmethod
+    def getResource(file_path):
+        return QtCore.QDir.current().absoluteFilePath(rf'resource/{file_path}')
+
     @override
     def mousePressEvent(self, QEvent):  # 响应鼠标点击
         self.start_pos = QEvent.pos()  # 记录第一下鼠标点击的坐标
+
+        if QEvent.button() == QtCore.Qt.LeftButton and not self.draggable_menu.isChecked():
+            self.player.stop()
+            self.player.play()
 
     @override
     def mouseMoveEvent(self, QEvent):  # 响应鼠标移动
