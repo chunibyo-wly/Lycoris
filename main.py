@@ -2,6 +2,7 @@ import sys
 from math import sin, pi, atan2
 
 from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
+from PyQt5.QtCore import QPoint
 
 
 def override(f):
@@ -12,12 +13,17 @@ class PixLabel(QtWidgets.QLabel):
     def __init__(self, parent):
         super(PixLabel, self).__init__(parent)
         self.start_pos = None
+        self.abs_pos = None
 
     def mousePressEvent(self, QEvent):
         self.start_pos = QEvent.pos()
+        self.abs_pos = self.pos()
 
     def mouseMoveEvent(self, QEvent):
         self.move(self.pos() + QEvent.pos() - self.start_pos)
+
+    def offset(self):
+        return self.pos() - self.abs_pos
 
 
 class MainWindow(QtWidgets.QWidget):  # 主窗口 继承自QWidgets
@@ -99,6 +105,13 @@ class MainWindow(QtWidgets.QWidget):  # 主窗口 继承自QWidgets
         if QEvent.button() == QtCore.Qt.LeftButton and not self.draggable_menu.isChecked():
             self.player.stop()
             self.player.play()
+
+            x, y = self.figLabel.offset().x(), self.figLabel.offset().y()
+            if abs(x) <= 15 and abs(y) <= 15:
+                if self.sakana:
+                    self.figLabel.move(QPoint(0, self.height))
+                else:
+                    self.figLabel.move(QPoint(self.width, 0))
 
             self.animation.setDuration(self.player.duration())
             self.animation.start()
