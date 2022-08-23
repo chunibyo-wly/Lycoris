@@ -2,3 +2,6 @@
 
 [demo演示](https://www.bilibili.com/video/BV1uB4y157oX?share_source=copy_web&vd_source=3e0d09ce740508b60a264081c9cea344)
 
+[音频](https://www.bilibili.com/video/BV1CP411L7KV?spm_id_from=333.788.top_right_bar_window_history.content.click) 
+
+[立绘 @blue00f4](https://twitter.com/blue00f4)
