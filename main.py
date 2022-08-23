@@ -11,12 +11,10 @@ def override(f):
 class PixLabel(QtWidgets.QLabel):
     def __init__(self, parent):
         super(PixLabel, self).__init__(parent)
-        self.start_pixmap = None
         self.start_pos = None
 
     def mousePressEvent(self, QEvent):
         self.start_pos = QEvent.pos()
-        self.start_pixmap = self.pixmap()
 
     def mouseMoveEvent(self, QEvent):
         self.move(self.pos() + QEvent.pos() - self.start_pos)
@@ -30,6 +28,7 @@ class MainWindow(QtWidgets.QWidget):  # 主窗口 继承自QWidgets
         self.start_pos = None
         self.width = 600
         self.height = 540
+        self.sakana = True
 
         # 组件
         self.figLabel = PixLabel(self)  # 创建一个QLabel用于展示立绘图
@@ -38,6 +37,7 @@ class MainWindow(QtWidgets.QWidget):  # 主窗口 继承自QWidgets
         self.menu = QtWidgets.QMenu()  # 实例化一个QMenu对象
         self.draggable_menu = self.menu.addAction('位置移动')
         self.draggable_menu.setCheckable(True)
+        self.switch_menu = self.menu.addAction("切换角色")
         self.exit_menu = self.menu.addAction('退出')  # 往QMenu添加一个文本为“退出”的action 存放在exit变量里
 
         self.player = None
@@ -59,7 +59,7 @@ class MainWindow(QtWidgets.QWidget):  # 主窗口 继承自QWidgets
 
     def updatePixmap(self, image_name):
         self.pixmap = QtGui.QPixmap(self.getResource(image_name))
-        pixmap = self.pixmap.scaled(self.width, self.height, QtCore.Qt.IgnoreAspectRatio,
+        pixmap = self.pixmap.scaled(self.width, self.height, QtCore.Qt.KeepAspectRatio,
                                     QtCore.Qt.SmoothTransformation)  # 抗锯齿缩放至800x720
         self.figLabel.setPixmap(pixmap)  # 用setPixmap将立绘展示到QLabel上
 
@@ -113,6 +113,11 @@ class MainWindow(QtWidgets.QWidget):  # 主窗口 继承自QWidgets
                 self.figLabel.setDisabled(True)
             else:
                 self.figLabel.setDisabled(False)
+        elif action == self.switch_menu:
+            self.sakana = not self.sakana
+            character = "sakana" if self.sakana else "chianago"
+            self.updatePixmap(f"{character}.png")
+            self.updateAudioFile(f"{character}.wav")
 
 
 if __name__ == '__main__':
